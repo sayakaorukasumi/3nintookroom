@@ -17,7 +17,7 @@
     .header { background:#00B900; color:white; padding:10px 16px; display:flex; align-items:center; gap:10px; box-shadow:0 1px 4px rgba(0,0,0,0.25); min-height:56px; flex-shrink:0; }
     .header-title { font-size:17px; font-weight:bold; flex:1; text-align:center; }
     .back-btn { background:none; border:none; color:white; font-size:28px; cursor:pointer; padding:0 4px; line-height:1; font-weight:300; }
-    .header-avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; color:white; flex-shrink:0; background-size:cover; background-position:center; }
+    .header-avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; color:white; flex-shrink:0; background-size:contain; background-repeat:no-repeat; background-position:center; }
     .header-spacer { width:38px; }
 
     .chat-list { flex:1; overflow-y:auto; background:white; }
@@ -27,7 +27,7 @@
     .avatar-wrap { position:relative; flex-shrink:0; }
     .avatar-cam { position:absolute; bottom:-3px; right:-3px; width:20px; height:20px; background:#00B900; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; border:2.5px solid white; pointer-events:none; }
 
-    .chat-item-avatar { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:bold; color:white; background-size:cover; background-position:center; }
+    .chat-item-avatar { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:bold; color:white; background-size:contain; background-repeat:no-repeat; background-position:center; }
     .chat-item-info { flex:1; min-width:0; }
     .chat-item-name { font-size:16px; font-weight:bold; color:#1a1a1a; margin-bottom:3px; }
     .chat-item-preview { font-size:13px; color:#999; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
@@ -40,7 +40,7 @@
     .date-separator span { background:rgba(0,0,0,0.18); color:white; font-size:11px; padding:3px 12px; border-radius:12px; }
     .message-row { display:flex; align-items:flex-end; gap:6px; }
     .message-row.user { flex-direction:row-reverse; }
-    .msg-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold; color:white; flex-shrink:0; align-self:flex-end; background-size:cover; background-position:center; }
+    .msg-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold; color:white; flex-shrink:0; align-self:flex-end; background-size:contain; background-repeat:no-repeat; background-position:center; }
     .msg-content { display:flex; flex-direction:column; gap:2px; max-width:72%; }
     .message-row.user .msg-content { align-items:flex-end; }
     .msg-name { font-size:11px; color:#666; padding-left:2px; margin-bottom:1px; }
@@ -171,92 +171,85 @@
   </div>
 </div>
 
-<!-- Hidden file inputs -->
 <input type="file" id="av-input-kaoru" accept="image/*" style="display:none" onchange="handleAvatarFile('kaoru',this)">
 <input type="file" id="av-input-kasumi" accept="image/*" style="display:none" onchange="handleAvatarFile('kasumi',this)">
 
 <script>
-function getTime() {
-  const d = new Date();
-  return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
-}
+function getTime(){const d=new Date();return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
 function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');}
 
 document.getElementById('kaoru-init-time').textContent=getTime();
 document.getElementById('kasumi-init-time').textContent=getTime();
 
-// ===== Avatar Management =====
-const avatarData = { kaoru: null, kasumi: null };
+// ===== Avatar =====
+const avatarData={kaoru:null,kasumi:null};
 
-function applyAvatarEl(el, dataUrl) {
-  if (!el) return;
-  el.style.backgroundImage = `url(${dataUrl})`;
-  el.style.backgroundSize = 'cover';
-  el.style.backgroundPosition = 'center';
-  el.textContent = '';
+function applyAvatarEl(el,dataUrl){
+  if(!el)return;
+  el.style.backgroundImage=`url(${dataUrl})`;
+  el.style.backgroundSize='contain';
+  el.style.backgroundRepeat='no-repeat';
+  el.style.backgroundPosition='center';
+  el.textContent='';
 }
 
-function applyAvatarAll(ch, dataUrl) {
-  avatarData[ch] = dataUrl;
-  applyAvatarEl(document.getElementById('home-av-'+ch), dataUrl);
-  applyAvatarEl(document.getElementById('header-av-'+ch), dataUrl);
-  applyAvatarEl(document.getElementById('init-av-'+ch), dataUrl);
+function applyAvatarAll(ch,dataUrl){
+  avatarData[ch]=dataUrl;
+  applyAvatarEl(document.getElementById('home-av-'+ch),dataUrl);
+  applyAvatarEl(document.getElementById('header-av-'+ch),dataUrl);
+  applyAvatarEl(document.getElementById('init-av-'+ch),dataUrl);
 }
 
-function loadAvatars() {
-  ['kaoru','kasumi'].forEach(ch => {
-    const d = localStorage.getItem('av_'+ch);
-    if (d) applyAvatarAll(ch, d);
+function loadAvatars(){
+  ['kaoru','kasumi'].forEach(ch=>{
+    const d=localStorage.getItem('av_'+ch);
+    if(d)applyAvatarAll(ch,d);
   });
 }
 
-function pickAvatar(ch) {
-  document.getElementById('av-input-'+ch).click();
-}
+function pickAvatar(ch){document.getElementById('av-input-'+ch).click();}
 
-function handleAvatarFile(ch, input) {
-  const file = input.files[0];
-  if (!file) return;
-  input.value = '';
-  const reader = new FileReader();
-  reader.onload = e => {
-    resizeImage(e.target.result, 240, resized => {
-      localStorage.setItem('av_'+ch, resized);
-      applyAvatarAll(ch, resized);
-      const name = ch === 'kaoru' ? '薫' : '霞';
-      showToast(name+'のアイコンを設定したよ！');
+function handleAvatarFile(ch,input){
+  const file=input.files[0];if(!file)return;
+  input.value='';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    resizeImage(e.target.result,300,resized=>{
+      localStorage.setItem('av_'+ch,resized);
+      applyAvatarAll(ch,resized);
+      showToast((ch==='kaoru'?'薫':'霞')+'のアイコンを設定したよ！');
     });
   };
   reader.readAsDataURL(file);
 }
 
-function resizeImage(dataUrl, size, cb) {
-  const img = new Image();
-  img.onload = () => {
-    const s = Math.min(img.width, img.height, size);
-    const canvas = document.createElement('canvas');
-    canvas.width = s; canvas.height = s;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, s, s);
-    cb(canvas.toDataURL('image/jpeg', 0.82));
+function resizeImage(dataUrl,maxSize,cb){
+  const img=new Image();
+  img.onload=()=>{
+    const scale=Math.min(maxSize/img.width,maxSize/img.height,1);
+    const w=Math.round(img.width*scale);
+    const h=Math.round(img.height*scale);
+    const canvas=document.createElement('canvas');
+    canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    cb(canvas.toDataURL('image/jpeg',0.85));
   };
-  img.src = dataUrl;
+  img.src=dataUrl;
 }
 
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
+function showToast(msg){
+  const t=document.createElement('div');
+  t.className='toast';t.textContent=msg;
   document.body.appendChild(t);
-  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 1800);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400);},1800);
 }
 
-function avatarHtml(ch, className) {
-  const name = ch==='kaoru'?'薫':'霞';
-  const col = 'av-'+ch;
-  if (avatarData[ch]) {
-    return `<div class="${className} ${col}" style="background-image:url(${avatarData[ch]});background-size:cover;background-position:center;"></div>`;
+function avatarHtml(ch,className){
+  const name=ch==='kaoru'?'薫':'霞';
+  const col='av-'+ch;
+  if(avatarData[ch]){
+    return `<div class="${className} ${col}" style="background-image:url(${avatarData[ch]});background-size:contain;background-repeat:no-repeat;background-position:center;"></div>`;
   }
   return `<div class="${className} ${col}">${name}</div>`;
 }
@@ -264,7 +257,7 @@ function avatarHtml(ch, className) {
 loadAvatars();
 
 // ===== Responses =====
-const KAORU = [
+const KAORU=[
   {kw:['おはよう','おはよ','おはようさん','朝'],res:['おはよ〜さやちゃん！ちゃんと寝れた？😊','おはようさん！今日もいい天気やといいな〜','おはよ〜！早起きやん、えらい✨','おはよ〜！朝ごはん食べた？','おはようさん〜！今日も一日よろしくな😄']},
   {kw:['こんにちは','こんにちわ','こんにち'],res:['こんにちは〜！何してたん？','あ、さやちゃん！こんにちは〜😊','こんにちは！昼ご飯もう食べた？','こんにちは〜、急にどうしたん？笑']},
   {kw:['こんばんは','こんばんわ'],res:['こんばんは〜！今日どやった？','こんばんは！夜やねんな、もうそんな時間か〜','こんばんは！夜ご飯食べた？','あ、こんばんは〜！ゆっくりしてた？']},
@@ -292,7 +285,7 @@ const KAORU = [
   {kw:['うん','はい','そう','そうやな'],res:['やろ〜！笑','やんな〜！','せやねん笑','うんうん、そうやな〜']},
 ];
 
-const KASUMI = [
+const KASUMI=[
   {kw:['おはよう','おはよ','おはようさん','朝'],res:['あら、おはよう。ちゃんと起きられたじゃない','おはよう。朝からどうしたの','おはよう。寝坊してないでしょうね','…おはよう。珍しく早いじゃない']},
   {kw:['こんにちは','こんにちわ','こんにち'],res:['こんにちは。何か用？','あら、さや。珍しいわね、こんな時間に','こんにちは。昼ご飯はちゃんと食べたの？']},
   {kw:['こんばんは','こんばんわ'],res:['こんばんは。こんな時間まで何してたの','あら、遅いじゃない。ちゃんと夜ご飯食べた？','こんばんは。今日はどうだったの']},
@@ -323,13 +316,12 @@ const KASUMI = [
 const KAORU_DEF=['ほんまに？えへへ、よう分からんかったわ〜','うんうん、なるほどな〜','そっかそっか〜！','へえ〜、そうなんや！','ほんまやな〜笑','えっ、もうちょっと詳しく教えて？','なんか気になるな〜笑'];
 const KASUMI_DEF=['そう','……それで？','何が言いたいの、はっきりしなさい','まあ、そうね','続けなさい','……','なるほどね','それがどうしたの'];
 
-function getResponse(ch,msg) {
-  const t=ch==='kaoru'?KAORU:KASUMI, d=ch==='kaoru'?KAORU_DEF:KASUMI_DEF;
+function getResponse(ch,msg){
+  const t=ch==='kaoru'?KAORU:KASUMI,d=ch==='kaoru'?KAORU_DEF:KASUMI_DEF;
   for(const e of t){for(const k of e.kw){if(msg.includes(k))return rand(e.res);}}
   return rand(d);
 }
 
-// ===== UI =====
 const typing={kaoru:false,kasumi:false};
 
 function openChat(ch){
@@ -343,10 +335,7 @@ function goHome(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
 }
-function scrollBottom(ch){
-  const el=document.getElementById(ch+'-messages');
-  setTimeout(()=>{el.scrollTop=el.scrollHeight;},60);
-}
+function scrollBottom(ch){const el=document.getElementById(ch+'-messages');setTimeout(()=>{el.scrollTop=el.scrollHeight;},60);}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
 function handleKey(e,ch){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage(ch);}}
 
