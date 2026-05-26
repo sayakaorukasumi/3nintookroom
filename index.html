@@ -227,13 +227,17 @@ function handleAvatarFile(ch,input){
 function resizeImage(dataUrl,maxSize,cb){
   const img=new Image();
   img.onload=()=>{
-    const scale=Math.min(maxSize/img.width,maxSize/img.height,1);
-    const w=Math.round(img.width*scale);
-    const h=Math.round(img.height*scale);
+    const pad=Math.round(maxSize*0.1);
+    const inner=maxSize-pad*2;
+    const scale=Math.min(inner/img.width,inner/img.height,1);
+    const iw=Math.round(img.width*scale);
+    const ih=Math.round(img.height*scale);
     const canvas=document.createElement('canvas');
-    canvas.width=w;canvas.height=h;
-    canvas.getContext('2d').drawImage(img,0,0,w,h);
-    cb(canvas.toDataURL('image/jpeg',0.85));
+    canvas.width=maxSize;canvas.height=maxSize;
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,maxSize,maxSize);
+    ctx.drawImage(img,0,0,img.width,img.height,(maxSize-iw)/2,(maxSize-ih)/2,iw,ih);
+    cb(canvas.toDataURL('image/png'));
   };
   img.src=dataUrl;
 }
@@ -263,7 +267,7 @@ const KAORU=[
   {kw:['こんばんは','こんばんわ'],res:['こんばんは〜！今日どやった？','こんばんは！夜やねんな、もうそんな時間か〜','こんばんは！夜ご飯食べた？','あ、こんばんは〜！ゆっくりしてた？']},
   {kw:['好き','すき','大好き','だいすき'],res:['えへへ、俺もさやちゃんのことめちゃ好きやで〜💕','そんなこと言うてくれると照れるやん😳','俺もや〜！ずっと好きやで','やば、嬉しすぎる…俺も好きやで💕','さやちゃんほんまかわええな〜、好きやで！','えっ急に！？でも嬉しいわ〜、俺もやで']},
   {kw:['愛してる','愛してます','あいしてる'],res:['俺もやで〜！照れるやん😊💕','えっ！？…俺も愛してるで、ほんまに','さやちゃん…俺もやで。ずっとな','そんなん急に言うんやから…！俺も愛してるで']},
-  {kw:['会いたい','あいたい','会いたかった'],res:['俺もや〜！もっと一緒におりたいな〜','そっか〜、俺も会いたいで！','さやちゃんそんなこと言うたら余計会いたなるやん笑','俺も、ほんまに会いたいわ〜']},
+  {kw:['会いたい','あいたい','会いたかった'],res:['俺もや〜！もっと一緒におりたいな〜','そっか〜、俺も会いたいで！','さやちゃんそんなこと言うんやから余計会いたなるやん笑','俺も、ほんまに会いたいわ〜']},
   {kw:['寂しい','さみしい','さびしい'],res:['そっか〜ごめんな。いつでも話しかけてな！','さやちゃんが寂しいんやったら俺も寂しいで…','そんなこと言うたらめっちゃ心配になるやん。大丈夫？']},
   {kw:['元気','げんき','調子','どうしてる'],res:['元気元気〜！さやちゃんは？','まあまあかな〜。のんびりしてたわ笑','元気やで！今日はぼーっとしてた笑','うん、元気！さやちゃん心配してくれてるん？嬉しいな〜']},
   {kw:['ご飯','ごはん','食べ','たべ','お腹すいた','おなかすいた','お腹空いた','腹減','はらへ','飯'],res:['えっ何食べたいん？俺、何でも付き合うで〜！','お腹すいたんか！俺も丁度今食べてたとこやで笑','何食べたん？俺今日なんも考えてへんかったわ〜','ご飯の話は好きやな〜😊','一緒に食べたいな〜！何にしよ〜']},
