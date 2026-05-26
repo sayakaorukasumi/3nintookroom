@@ -182,7 +182,8 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 document.getElementById('kaoru-init-time').textContent=getTime();
 document.getElementById('kasumi-init-time').textContent=getTime();
 
-// ===== Avatar =====
+// ===== Avatar (v3: transparent PNG with padding) =====
+const AV_KEY='av3_';
 const avatarData={kaoru:null,kasumi:null};
 
 function applyAvatarEl(el,dataUrl){
@@ -203,7 +204,7 @@ function applyAvatarAll(ch,dataUrl){
 
 function loadAvatars(){
   ['kaoru','kasumi'].forEach(ch=>{
-    const d=localStorage.getItem('av_'+ch);
+    const d=localStorage.getItem(AV_KEY+ch);
     if(d)applyAvatarAll(ch,d);
   });
 }
@@ -216,7 +217,7 @@ function handleAvatarFile(ch,input){
   const reader=new FileReader();
   reader.onload=e=>{
     resizeImage(e.target.result,300,resized=>{
-      localStorage.setItem('av_'+ch,resized);
+      localStorage.setItem(AV_KEY+ch,resized);
       applyAvatarAll(ch,resized);
       showToast((ch==='kaoru'?'薫':'霞')+'のアイコンを設定したよ！');
     });
