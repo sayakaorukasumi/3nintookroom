@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3人のトークルーム</title>
-  <!-- v6 -->
+  <!-- v7 -->
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     body {
@@ -183,8 +183,8 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 document.getElementById('kaoru-init-time').textContent=getTime();
 document.getElementById('kasumi-init-time').textContent=getTime();
 
-// ===== Avatar (v6) =====
-const AV_KEY='av6_';
+// ===== Avatar (v7) =====
+const AV_KEY='av7_';
 const avatarData={kaoru:null,kasumi:null};
 
 function applyAvatarEl(el,dataUrl){
@@ -229,7 +229,7 @@ function handleAvatarFile(ch,input){
 function resizeImage(dataUrl,maxSize,cb){
   const img=new Image();
   img.onload=()=>{
-    const pad=Math.round(maxSize*0.2);
+    const pad=Math.round(maxSize*0.08);
     const inner=maxSize-pad*2;
     const scale=Math.min(inner/img.width,inner/img.height,1);
     const iw=Math.round(img.width*scale);
