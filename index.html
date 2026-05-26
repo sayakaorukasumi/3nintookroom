@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3人のトークルーム</title>
+  <!-- v4 -->
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     body {
@@ -182,8 +183,8 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 document.getElementById('kaoru-init-time').textContent=getTime();
 document.getElementById('kasumi-init-time').textContent=getTime();
 
-// ===== Avatar (v3: transparent PNG with padding) =====
-const AV_KEY='av3_';
+// ===== Avatar (v4) =====
+const AV_KEY='av4_';
 const avatarData={kaoru:null,kasumi:null};
 
 function applyAvatarEl(el,dataUrl){
