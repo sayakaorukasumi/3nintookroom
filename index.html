@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3人のトークルーム</title>
-  <!-- v10 -->
+  <!-- v11 -->
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     body {
@@ -453,8 +453,7 @@ function sendGroupMessage(){
   userDiv.className='message-row user';
   userDiv.innerHTML=`<div class="msg-content"><div class="msg-bubble-wrap"><div class="msg-meta"><div class="msg-read">既読</div><div class="msg-time">${t}</div></div><div class="msg-bubble">${escHtml(text)}</div></div></div>`;
   container.appendChild(userDiv);scrollBottom('group');
-  const roll=Math.random();
-  const responders=roll<0.33?['kaoru']:roll<0.66?['kasumi']:(Math.random()<0.5?['kaoru','kasumi']:['kasumi','kaoru']);
+  const responders=Math.random()<0.5?['kaoru','kasumi']:['kasumi','kaoru'];
   function doNext(idx){
     if(idx>=responders.length){groupBusy=false;return;}
     const ch=responders[idx];
