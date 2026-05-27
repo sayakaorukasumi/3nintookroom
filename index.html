@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3人のトークルーム</title>
-  <!-- v9 -->
+  <!-- v10 -->
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     body {
@@ -20,13 +20,19 @@
     .back-btn { background:none; border:none; color:white; font-size:28px; cursor:pointer; padding:0 4px; line-height:1; font-weight:300; }
     .header-avatar { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:bold; color:white; flex-shrink:0; background-size:cover; background-repeat:no-repeat; background-position:center top; }
     .header-spacer { width:52px; }
+    .header-pair { display:flex; gap:3px; flex-shrink:0; }
+    .header-mini { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:bold; color:white; background-size:cover; background-repeat:no-repeat; background-position:center top; }
 
     .chat-list { flex:1; overflow-y:auto; background:white; }
     .chat-item { display:flex; align-items:center; padding:14px 16px; background:white; border-bottom:1px solid #ebebeb; cursor:pointer; gap:12px; }
     .chat-item:active { background:#f5f5f5; }
-
     .avatar-wrap { position:relative; flex-shrink:0; }
     .avatar-cam { position:absolute; bottom:-3px; right:-3px; width:20px; height:20px; background:#00B900; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; border:2.5px solid white; pointer-events:none; }
+
+    .group-pair { width:56px; height:56px; position:relative; flex-shrink:0; }
+    .group-mini { width:36px; height:36px; border-radius:9px; position:absolute; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; color:white; background-size:cover; background-repeat:no-repeat; background-position:center top; border:2.5px solid white; }
+    .gm-top { top:0; left:0; z-index:1; }
+    .gm-btm { bottom:0; right:0; z-index:2; }
 
     .chat-item-avatar { width:56px; height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:bold; color:white; background-size:cover; background-repeat:no-repeat; background-position:center top; }
     .chat-item-info { flex:1; min-width:0; }
@@ -68,7 +74,6 @@
 
     .av-kaoru { background:linear-gradient(135deg,#c8845a,#e8a87a); }
     .av-kasumi { background:linear-gradient(135deg,#3a3268,#6b5ca8); }
-
     .toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.72); color:white; padding:9px 20px; border-radius:20px; font-size:13px; z-index:9999; white-space:nowrap; pointer-events:none; opacity:1; transition:opacity 0.4s; }
   </style>
 </head>
@@ -82,6 +87,21 @@
     <div class="header-spacer"></div>
   </div>
   <div class="chat-list">
+
+    <div class="chat-item" onclick="openChat('group')">
+      <div class="group-pair">
+        <div class="group-mini av-kaoru gm-top" id="home-gm-kaoru">薫</div>
+        <div class="group-mini av-kasumi gm-btm" id="home-gm-kasumi">霞</div>
+      </div>
+      <div class="chat-item-info">
+        <div class="chat-item-name">3人ルーム</div>
+        <div class="chat-item-preview" id="group-preview">みんなで話そう！</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time" id="group-time">今</div>
+        <div class="chat-item-badge" id="group-badge" style="display:none">1</div>
+      </div>
+    </div>
 
     <div class="chat-item" onclick="openChat('kaoru')">
       <div class="avatar-wrap" onclick="event.stopPropagation();pickAvatar('kaoru')">
@@ -172,6 +192,47 @@
   </div>
 </div>
 
+<!-- GROUP CHAT -->
+<div id="screen-group" class="screen">
+  <div class="header">
+    <button class="back-btn" onclick="goHome()">‹</button>
+    <div class="header-pair">
+      <div class="header-mini av-kaoru" id="header-gm-kaoru">薫</div>
+      <div class="header-mini av-kasumi" id="header-gm-kasumi">霞</div>
+    </div>
+    <div class="header-title" style="text-align:left">3人ルーム</div>
+  </div>
+  <div class="chat-messages" id="group-messages">
+    <div class="date-separator"><span>今日</span></div>
+    <div class="message-row received">
+      <div class="msg-avatar av-kaoru" id="init-gm-kaoru">薫</div>
+      <div class="msg-content">
+        <div class="msg-name">薫</div>
+        <div class="msg-bubble-wrap">
+          <div class="msg-bubble">3人でトークするで〜！😊</div>
+          <div class="msg-meta"><div class="msg-time" id="group-kaoru-init-time"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="message-row received">
+      <div class="msg-avatar av-kasumi" id="init-gm-kasumi">霞</div>
+      <div class="msg-content">
+        <div class="msg-name">霞</div>
+        <div class="msg-bubble-wrap">
+          <div class="msg-bubble">……別にいいけど。</div>
+          <div class="msg-meta"><div class="msg-time" id="group-kasumi-init-time"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="chat-input-area">
+    <textarea class="chat-input" id="group-input" placeholder="メッセージを入力" rows="1" oninput="autoResize(this)" onkeydown="handleKey(event,'group')"></textarea>
+    <button class="send-btn" onclick="sendMessage('group')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
 <input type="file" id="av-input-kaoru" accept="image/*" style="display:none" onchange="handleAvatarFile('kaoru',this)">
 <input type="file" id="av-input-kasumi" accept="image/*" style="display:none" onchange="handleAvatarFile('kasumi',this)">
 
@@ -182,8 +243,10 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 
 document.getElementById('kaoru-init-time').textContent=getTime();
 document.getElementById('kasumi-init-time').textContent=getTime();
+document.getElementById('group-kaoru-init-time').textContent=getTime();
+document.getElementById('group-kasumi-init-time').textContent=getTime();
 
-// ===== Avatar (v8) =====
+// ===== Avatar =====
 const AV_KEY='av8_';
 const avatarData={kaoru:null,kasumi:null};
 
@@ -201,6 +264,9 @@ function applyAvatarAll(ch,dataUrl){
   applyAvatarEl(document.getElementById('home-av-'+ch),dataUrl);
   applyAvatarEl(document.getElementById('header-av-'+ch),dataUrl);
   applyAvatarEl(document.getElementById('init-av-'+ch),dataUrl);
+  applyAvatarEl(document.getElementById('home-gm-'+ch),dataUrl);
+  applyAvatarEl(document.getElementById('header-gm-'+ch),dataUrl);
+  applyAvatarEl(document.getElementById('init-gm-'+ch),dataUrl);
 }
 
 function loadAvatars(){
@@ -326,6 +392,7 @@ function getResponse(ch,msg){
 }
 
 const typing={kaoru:false,kasumi:false};
+let groupBusy=false;
 
 function openChat(ch){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -343,6 +410,7 @@ function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrol
 function handleKey(e,ch){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage(ch);}}
 
 function sendMessage(ch){
+  if(ch==='group'){sendGroupMessage();return;}
   const input=document.getElementById(ch+'-input');
   const text=input.value.trim();
   if(!text||typing[ch])return;
@@ -371,6 +439,44 @@ function sendMessage(ch){
     document.getElementById(ch+'-time').textContent=t2;
     typing[ch]=false;
   },900+Math.random()*1400);
+}
+
+function sendGroupMessage(){
+  const input=document.getElementById('group-input');
+  const text=input.value.trim();
+  if(!text||groupBusy)return;
+  groupBusy=true;
+  input.value='';input.style.height='auto';
+  const container=document.getElementById('group-messages');
+  const t=getTime();
+  const userDiv=document.createElement('div');
+  userDiv.className='message-row user';
+  userDiv.innerHTML=`<div class="msg-content"><div class="msg-bubble-wrap"><div class="msg-meta"><div class="msg-read">既読</div><div class="msg-time">${t}</div></div><div class="msg-bubble">${escHtml(text)}</div></div></div>`;
+  container.appendChild(userDiv);scrollBottom('group');
+  const roll=Math.random();
+  const responders=roll<0.33?['kaoru']:roll<0.66?['kasumi']:(Math.random()<0.5?['kaoru','kasumi']:['kasumi','kaoru']);
+  function doNext(idx){
+    if(idx>=responders.length){groupBusy=false;return;}
+    const ch=responders[idx];
+    const charName=ch==='kaoru'?'薫':'霞';
+    const typDiv=document.createElement('div');
+    typDiv.className='typing-row';typDiv.id='gtyp-'+ch;
+    typDiv.innerHTML=avatarHtml(ch,'msg-avatar')+`<div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+    container.appendChild(typDiv);scrollBottom('group');
+    const reply=getResponse(ch,text);
+    setTimeout(()=>{
+      const td=document.getElementById('gtyp-'+ch);if(td)td.remove();
+      const t2=getTime();
+      const div=document.createElement('div');
+      div.className='message-row received';
+      div.innerHTML=avatarHtml(ch,'msg-avatar')+`<div class="msg-content"><div class="msg-name">${charName}</div><div class="msg-bubble-wrap"><div class="msg-bubble">${escHtml(reply)}</div><div class="msg-meta"><div class="msg-time">${t2}</div></div></div></div>`;
+      container.appendChild(div);scrollBottom('group');
+      document.getElementById('group-preview').textContent=charName+': '+reply;
+      document.getElementById('group-time').textContent=t2;
+      setTimeout(()=>doNext(idx+1),400);
+    },900+Math.random()*1200);
+  }
+  doNext(0);
 }
 </script>
 </body>
