@@ -1,0 +1,15 @@
+{
+  "name": "3人のトークルーム",
+  "short_name": "3人ルーム",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00B900",
+  "icons": [
+    {
+      "src": "D057E2EC-469C-423F-9061-21E49F73D265.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}
