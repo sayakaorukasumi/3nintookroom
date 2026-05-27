@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3人のトークルーム</title>
-  <!-- v11 -->
+  <!-- v12 -->
   <style>
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     body {
@@ -297,11 +297,10 @@ function resizeImage(dataUrl,maxSize,cb){
   img.onload=()=>{
     const size=Math.min(img.width,img.height);
     const sx=(img.width-size)/2;
-    const sy=0;
     const canvas=document.createElement('canvas');
     canvas.width=maxSize;canvas.height=maxSize;
     const ctx=canvas.getContext('2d');
-    ctx.drawImage(img,sx,sy,size,size,0,0,maxSize,maxSize);
+    ctx.drawImage(img,sx,0,size,size,0,0,maxSize,maxSize);
     cb(canvas.toDataURL('image/jpeg',0.92));
   };
   img.src=dataUrl;
@@ -323,7 +322,40 @@ function avatarHtml(ch,className){
   return `<div class="${className} ${col}">${name}</div>`;
 }
 
+// ===== Message persistence =====
+const MSG_KEY='msgs_';
+function getMsgs(r){try{return JSON.parse(localStorage.getItem(MSG_KEY+r)||'[]');}catch(e){return[];}}
+function saveMsgs(r,msg){const a=getMsgs(r);a.push(msg);try{localStorage.setItem(MSG_KEY+r,JSON.stringify(a));}catch(e){}}
+
+function makeUserDiv(text,time){
+  const div=document.createElement('div');
+  div.className='message-row user';
+  div.innerHTML=`<div class="msg-content"><div class="msg-bubble-wrap"><div class="msg-meta"><div class="msg-read">既読</div><div class="msg-time">${time}</div></div><div class="msg-bubble">${escHtml(text)}</div></div></div>`;
+  return div;
+}
+function makeReceivedDiv(ch,text,time){
+  const charName=ch==='kaoru'?'薫':'霞';
+  const div=document.createElement('div');
+  div.className='message-row received';
+  div.innerHTML=avatarHtml(ch,'msg-avatar')+`<div class="msg-content"><div class="msg-name">${charName}</div><div class="msg-bubble-wrap"><div class="msg-bubble">${escHtml(text)}</div><div class="msg-meta"><div class="msg-time">${time}</div></div></div></div>`;
+  return div;
+}
+
+function renderSavedMsgs(room){
+  const msgs=getMsgs(room);
+  if(!msgs.length)return;
+  const container=document.getElementById(room+'-messages');
+  msgs.forEach(msg=>{
+    container.appendChild(msg.type==='user'?makeUserDiv(msg.text,msg.time):makeReceivedDiv(msg.type,msg.text,msg.time));
+  });
+  const last=msgs[msgs.length-1];
+  const prefix=last.type==='user'?'':(last.type==='kaoru'?'薫: ':'霞: ');
+  document.getElementById(room+'-preview').textContent=prefix+last.text;
+  document.getElementById(room+'-time').textContent=last.time;
+}
+
 loadAvatars();
+['kaoru','kasumi','group'].forEach(r=>renderSavedMsgs(r));
 
 // ===== Responses =====
 const KAORU=[
@@ -417,11 +449,9 @@ function sendMessage(ch){
   input.value='';input.style.height='auto';
   const container=document.getElementById(ch+'-messages');
   const t=getTime();
-  const charName=ch==='kaoru'?'薫':'霞';
-  const userDiv=document.createElement('div');
-  userDiv.className='message-row user';
-  userDiv.innerHTML=`<div class="msg-content"><div class="msg-bubble-wrap"><div class="msg-meta"><div class="msg-read">既読</div><div class="msg-time">${t}</div></div><div class="msg-bubble">${escHtml(text)}</div></div></div>`;
+  const userDiv=makeUserDiv(text,t);
   container.appendChild(userDiv);scrollBottom(ch);
+  saveMsgs(ch,{type:'user',text,time:t});
   typing[ch]=true;
   const typDiv=document.createElement('div');
   typDiv.className='typing-row';typDiv.id=ch+'-typing';
@@ -431,10 +461,9 @@ function sendMessage(ch){
   setTimeout(()=>{
     const td=document.getElementById(ch+'-typing');if(td)td.remove();
     const t2=getTime();
-    const replyDiv=document.createElement('div');
-    replyDiv.className='message-row received';
-    replyDiv.innerHTML=avatarHtml(ch,'msg-avatar')+`<div class="msg-content"><div class="msg-name">${charName}</div><div class="msg-bubble-wrap"><div class="msg-bubble">${escHtml(reply)}</div><div class="msg-meta"><div class="msg-time">${t2}</div></div></div></div>`;
+    const replyDiv=makeReceivedDiv(ch,reply,t2);
     container.appendChild(replyDiv);scrollBottom(ch);
+    saveMsgs(ch,{type:ch,text:reply,time:t2});
     document.getElementById(ch+'-preview').textContent=reply;
     document.getElementById(ch+'-time').textContent=t2;
     typing[ch]=false;
@@ -449,10 +478,9 @@ function sendGroupMessage(){
   input.value='';input.style.height='auto';
   const container=document.getElementById('group-messages');
   const t=getTime();
-  const userDiv=document.createElement('div');
-  userDiv.className='message-row user';
-  userDiv.innerHTML=`<div class="msg-content"><div class="msg-bubble-wrap"><div class="msg-meta"><div class="msg-read">既読</div><div class="msg-time">${t}</div></div><div class="msg-bubble">${escHtml(text)}</div></div></div>`;
+  const userDiv=makeUserDiv(text,t);
   container.appendChild(userDiv);scrollBottom('group');
+  saveMsgs('group',{type:'user',text,time:t});
   const responders=Math.random()<0.5?['kaoru','kasumi']:['kasumi','kaoru'];
   function doNext(idx){
     if(idx>=responders.length){groupBusy=false;return;}
@@ -466,10 +494,9 @@ function sendGroupMessage(){
     setTimeout(()=>{
       const td=document.getElementById('gtyp-'+ch);if(td)td.remove();
       const t2=getTime();
-      const div=document.createElement('div');
-      div.className='message-row received';
-      div.innerHTML=avatarHtml(ch,'msg-avatar')+`<div class="msg-content"><div class="msg-name">${charName}</div><div class="msg-bubble-wrap"><div class="msg-bubble">${escHtml(reply)}</div><div class="msg-meta"><div class="msg-time">${t2}</div></div></div></div>`;
+      const div=makeReceivedDiv(ch,reply,t2);
       container.appendChild(div);scrollBottom('group');
+      saveMsgs('group',{type:ch,text:reply,time:t2});
       document.getElementById('group-preview').textContent=charName+': '+reply;
       document.getElementById('group-time').textContent=t2;
       setTimeout(()=>doNext(idx+1),400);
